@@ -5,13 +5,23 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from src.baseline import (
+    build_customer_baseline,
+    build_baseline_summary,
+)
 from src.data_loader import (
     load_all_customers,
     load_customer_by_id,
     load_transactions_for_customer,
     load_risk_rules,
 )
-from src.models import Customer, RiskRuleDefinition, Transaction
+from src.models import (
+    Customer,
+    CustomerBaseline,
+    CustomerBaselineSummary,
+    RiskRuleDefinition,
+    Transaction,
+)
 
 app = FastAPI(
     title="SentinelIQ — Transaction Risk Investigation Assistant",
@@ -91,6 +101,33 @@ async def get_risk_rules():
         return load_risk_rules()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load risk rules: {str(e)}")
+
+
+@app.get("/api/customers/{customer_id}/baseline", response_model=CustomerBaseline)
+async def get_customer_baseline(customer_id: str):
+    """Returns the complete statistical behavioral baseline for a specific customer."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    transactions = load_transactions_for_customer(customer_id)
+    return build_customer_baseline(transactions, customer_id=customer.customer_id)
+
+
+@app.get("/api/customers/{customer_id}/baseline/summary", response_model=CustomerBaselineSummary)
+async def get_customer_baseline_summary(customer_id: str):
+    """Returns a concise human-readable behavioral baseline summary for a customer."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    transactions = load_transactions_for_customer(customer_id)
+    baseline = build_customer_baseline(transactions, customer_id=customer.customer_id)
+    return build_baseline_summary(baseline)
 
 
 if __name__ == "__main__":

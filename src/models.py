@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -83,3 +83,83 @@ class RiskRuleDefinition(BaseModel):
     severity_guidance: str
     investigator_action: str
     limitations: str
+
+
+class AmountProfile(BaseModel):
+    count: int
+    total: float
+    mean: float
+    median: float
+    min: float
+    max: float
+    std_dev: float
+    q1: float
+    q3: float
+    iqr: float
+    typical_lower_bound: float
+    typical_upper_bound: float
+
+
+class TimeProfile(BaseModel):
+    hourly_counts: Dict[str, int]
+    earliest_hour: int
+    latest_hour: int
+    median_hour: int
+    common_hours: List[int]
+    typical_start_hour: int
+    typical_end_hour: int
+    late_night_transaction_count: int
+    late_night_percentage: float
+
+
+class ChannelProfile(BaseModel):
+    channel_counts: Dict[str, int]
+    channel_percentages: Dict[str, float]
+    common_channels: List[str]
+    primary_channel: str
+
+
+class PayeeProfile(BaseModel):
+    unique_payee_count: int
+    payee_counts: Dict[str, int]
+    most_frequent_payees: List[str]
+    payee_percentages: Dict[str, float]
+
+
+class FrequencyProfile(BaseModel):
+    transaction_count: int
+    active_days: int
+    date_range_days: int
+    transactions_per_active_day: float
+    transactions_per_calendar_day: float
+    transactions_per_week: float
+
+
+class CustomerBaseline(BaseModel):
+    customer_id: str
+    generated_at: Optional[str] = None
+    amount_profile: AmountProfile
+    time_profile: TimeProfile
+    channel_profile: ChannelProfile
+    payee_profile: PayeeProfile
+    frequency_profile: FrequencyProfile
+
+
+class TypicalAmountRange(BaseModel):
+    lower: float
+    upper: float
+
+
+class UsualTransactionHours(BaseModel):
+    start: int
+    end: int
+
+
+class CustomerBaselineSummary(BaseModel):
+    customer_id: str
+    transaction_count: int
+    typical_amount: float
+    typical_amount_range: TypicalAmountRange
+    usual_transaction_hours: UsualTransactionHours
+    common_channels: List[str]
+    frequent_payees: List[str]
