@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -163,3 +163,40 @@ class CustomerBaselineSummary(BaseModel):
     usual_transaction_hours: UsualTransactionHours
     common_channels: List[str]
     frequent_payees: List[str]
+
+
+class RiskFinding(BaseModel):
+    finding_id: str
+    customer_id: str
+    rule_id: str
+    title: str
+    severity: str  # "low", "medium", "high", "critical"
+    risk_score: int  # 0 to 100
+    score_components: Dict[str, Any]
+    transaction_ids: List[str]
+    primary_transaction_id: str
+    description: str
+    evidence: Dict[str, Any]
+    investigator_action: str
+    limitations: str
+    requires_human_review: bool = True
+    detected_at: Optional[str] = None
+
+
+class RiskAnalysisSummary(BaseModel):
+    highest_severity: str
+    highest_risk_score: int
+    rules_triggered: List[str]
+    requires_human_review: bool
+
+
+class CustomerRiskAnalysis(BaseModel):
+    customer_id: str
+    customer_name: str
+    transaction_count: int
+    finding_count: int
+    findings: List[RiskFinding]
+    summary: RiskAnalysisSummary
+    disclaimer: str = (
+        "The system identifies activity requiring human review. A risk finding does not establish that fraud has occurred."
+    )

@@ -19,9 +19,12 @@ from src.models import (
     Customer,
     CustomerBaseline,
     CustomerBaselineSummary,
+    CustomerRiskAnalysis,
+    RiskFinding,
     RiskRuleDefinition,
     Transaction,
 )
+from src.risk_engine import analyze_customer_risk
 
 app = FastAPI(
     title="SentinelIQ — Transaction Risk Investigation Assistant",
@@ -128,6 +131,65 @@ async def get_customer_baseline_summary(customer_id: str):
     transactions = load_transactions_for_customer(customer_id)
     baseline = build_customer_baseline(transactions, customer_id=customer.customer_id)
     return build_baseline_summary(baseline)
+
+
+@app.get("/api/customers/{customer_id}/risk-analysis", response_model=CustomerRiskAnalysis)
+async def get_customer_risk_analysis(customer_id: str):
+    """Runs deterministic risk evaluation against customer history and returns structured findings."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    transactions = load_transactions_for_customer(customer_id)
+    return analyze_customer_risk(
+        customer_id=customer.customer_id,
+        transactions=transactions,
+        customer_name=customer.name,
+    )
+
+
+@app.get("/api/customers/{customer_id}/findings", response_model=List[RiskFinding])
+async def get_customer_findings(customer_id: str):
+    """Returns the list of triggered risk findings for a specific customer."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    transactions = load_transactions_for_customer(customer_id)
+    analysis = analyze_customer_risk(
+        customer_id=customer.customer_id,
+        transactions=transactions,
+        customer_name=customer.name,
+    )
+    return analysis.findings
+
+
+@app.get("/api/customers/{customer_id}/findings/{finding_id}", response_model=RiskFinding)
+async def get_customer_finding_by_id(customer_id: str, finding_id: str):
+    """Returns a specific risk finding for a customer."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    transactions = load_transactions_for_customer(customer_id)
+    analysis = analyze_customer_risk(
+        customer_id=customer.customer_id,
+        transactions=transactions,
+        customer_name=customer.name,
+    )
+    for finding in analysis.findings:
+        if finding.finding_id == finding_id:
+            return finding
+    raise HTTPException(
+        status_code=404,
+        detail=f"Finding '{finding_id}' not found for customer '{customer_id}'."
+    )
 
 
 if __name__ == "__main__":
