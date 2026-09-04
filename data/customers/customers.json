@@ -1,0 +1,38 @@
+[
+  {
+    "customer_id": "CUST001",
+    "name": "Priya Sharma",
+    "scenario": "Normal / Routine Account Activity",
+    "description": "Established salaried retail customer with highly predictable monthly routine: grocery shopping, utility bills, periodic dining, streaming subscriptions, and regular daytime transactions. No anomalous transfers or unfamiliar bursts."
+  },
+  {
+    "customer_id": "CUST002",
+    "name": "Rajesh Verma",
+    "scenario": "Unusually Large Transfer Anomaly",
+    "description": "Retail customer with consistent modest spending history (median ~$85) over 3 months, followed by a sudden, unprecedented high-value outward transfer exceeding 20x historical baseline."
+  },
+  {
+    "customer_id": "CUST003",
+    "name": "Ananya Patel",
+    "scenario": "New Payee Payment Burst",
+    "description": "Consistent account holder who has transacted with a steady set of domestic utility and retail payees for months, suddenly executing four rapid consecutive payments to an unknown beneficiary within a 90-minute window."
+  },
+  {
+    "customer_id": "CUST004",
+    "name": "Vikram Malhotra",
+    "scenario": "Odd-Hours Activity Anomaly",
+    "description": "Business executive with strict daytime and early evening transaction profile (08:00 to 20:30). Account suddenly originates high-value transfers during the high-risk night window between 02:30 AM and 03:30 AM."
+  },
+  {
+    "customer_id": "CUST005",
+    "name": "Sameer Khan",
+    "scenario": "Complex Linked Pattern",
+    "description": "Multi-signal event chain: an initial micro-probing transfer ($1.00) to a newly created payee at 03:10 AM, rapidly followed by an escalating cluster of four maximum-limit transfers via IMPS in under 45 minutes."
+  },
+  {
+    "customer_id": "CUST006",
+    "name": "Sunita Rao",
+    "scenario": "Ambiguous / Borderline Case",
+    "description": "Account with occasional seasonal high-ticket retail purchases. Contains an elevated transaction to a previously known luxury merchant during festive season, presenting ambiguous deviation without clear burst or off-hour flags."
+  }
+]

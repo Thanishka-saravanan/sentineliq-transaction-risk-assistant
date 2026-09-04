@@ -1,8 +1,17 @@
 import os
+from typing import List
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+from src.data_loader import (
+    load_all_customers,
+    load_customer_by_id,
+    load_transactions_for_customer,
+    load_risk_rules,
+)
+from src.models import Customer, RiskRuleDefinition, Transaction
 
 app = FastAPI(
     title="SentinelIQ — Transaction Risk Investigation Assistant",
@@ -40,6 +49,48 @@ async def health_check():
         "version": "1.0.0",
         "gemini_api_key_configured": bool(os.getenv("GEMINI_API_KEY")),
     }
+
+
+@app.get("/api/customers", response_model=List[Customer])
+async def get_customers():
+    """Returns all available customer investigation profiles."""
+    try:
+        return load_all_customers()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load customers: {str(e)}")
+
+
+@app.get("/api/customers/{customer_id}", response_model=Customer)
+async def get_customer(customer_id: str):
+    """Returns profile details for a specific customer."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    return customer
+
+
+@app.get("/api/customers/{customer_id}/transactions", response_model=List[Transaction])
+async def get_customer_transactions(customer_id: str):
+    """Returns all historical transactions for a customer, sorted chronologically."""
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    return load_transactions_for_customer(customer_id)
+
+
+@app.get("/api/rules", response_model=List[RiskRuleDefinition])
+async def get_risk_rules():
+    """Returns the operational fraud desk risk rules (R01 through R05)."""
+    try:
+        return load_risk_rules()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load risk rules: {str(e)}")
 
 
 if __name__ == "__main__":
