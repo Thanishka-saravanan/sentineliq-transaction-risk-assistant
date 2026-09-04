@@ -200,3 +200,48 @@ class CustomerRiskAnalysis(BaseModel):
     disclaimer: str = (
         "The system identifies activity requiring human review. A risk finding does not establish that fraud has occurred."
     )
+
+
+# --- Phase 5 Models: GenAI Grounding & Investigation ---
+
+
+class InvestigationAssessment(BaseModel):
+    overall_assessment: str
+    key_concerns: List[str]
+    mitigating_factors: List[str]
+    confidence: str  # "low", "medium", "high"
+    requires_human_review: bool = True
+
+
+class FindingExplanation(BaseModel):
+    finding_id: str
+    rule_id: str
+    plain_language_explanation: str
+    why_it_deviates_from_baseline: str
+    evidence_considered: List[str]
+    mitigating_context: List[str]
+
+
+class InvestigationResult(BaseModel):
+    customer_id: str
+    executive_summary: str
+    investigation_assessment: InvestigationAssessment
+    finding_explanations: List[FindingExplanation]
+    investigation_questions: List[str]
+    recommended_next_steps: List[str]
+    limitations: List[str]
+    disclaimer: str = (
+        "The system identifies activity requiring human review. A risk finding does not establish that fraud has occurred."
+    )
+
+
+class GroundingContext(BaseModel):
+    customer: Customer
+    baseline_summary: CustomerBaselineSummary
+    deterministic_findings: List[RiskFinding]
+    relevant_policy_rules: List[RiskRuleDefinition]
+    relevant_transactions: List[Transaction]
+    disclaimer: str = (
+        "The system identifies activity requiring human review. A risk finding does not establish that fraud has occurred."
+    )
+    notes: str

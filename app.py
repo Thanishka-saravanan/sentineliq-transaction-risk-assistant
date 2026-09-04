@@ -15,11 +15,19 @@ from src.data_loader import (
     load_transactions_for_customer,
     load_risk_rules,
 )
+from src.genai_service import (
+    GeminiNotConfiguredError,
+    GeminiServiceError,
+    generate_investigation_report,
+)
+from src.investigation_context import build_grounding_context
 from src.models import (
     Customer,
     CustomerBaseline,
     CustomerBaselineSummary,
     CustomerRiskAnalysis,
+    GroundingContext,
+    InvestigationResult,
     RiskFinding,
     RiskRuleDefinition,
     Transaction,
@@ -190,6 +198,53 @@ async def get_customer_finding_by_id(customer_id: str, finding_id: str):
         status_code=404,
         detail=f"Finding '{finding_id}' not found for customer '{customer_id}'."
     )
+
+
+@app.get("/api/customers/{customer_id}/investigation/context", response_model=GroundingContext)
+async def get_investigation_context(customer_id: str):
+    """
+    Returns the transparent, verified grounding context sent to the GenAI Copilot.
+    Excludes system instructions and API keys for full auditability.
+    """
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+    return build_grounding_context(customer_id)
+
+
+@app.get("/api/customers/{customer_id}/investigation", response_model=InvestigationResult)
+async def get_customer_investigation(customer_id: str):
+    """
+    Synthesizes a grounded, auditable investigation report using Gemini.
+    Strictly reasons from deterministic evidence and risk policy.
+    """
+    customer = load_customer_by_id(customer_id)
+    if not customer:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Customer '{customer_id}' not found. Available IDs: CUST001 to CUST006."
+        )
+
+    try:
+        return generate_investigation_report(customer_id)
+    except GeminiNotConfiguredError as e:
+        raise HTTPException(
+            status_code=503,
+            detail="Gemini investigation service is not configured. Set GEMINI_API_KEY to enable GenAI investigation synthesis."
+        )
+    except GeminiServiceError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Gemini investigation service error: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Investigation generation failed: {str(e)}"
+        )
 
 
 if __name__ == "__main__":
