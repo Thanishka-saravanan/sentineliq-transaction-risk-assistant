@@ -2,177 +2,220 @@ TRACK_ID=PS06
 
 # SentinelIQ — Transaction Risk Investigation Assistant
 
-SentinelIQ is a specialized investigation assistant built for a bank's fraud desk. It analyzes multi-month customer transaction histories against deterministic risk rules, establishes per-customer behavioral baselines, and leverages Google Gemini for grounded reasoning and structured investigation reporting.
+SentinelIQ is a specialized, production-style investigation assistant built for a bank's fraud desk (Banking Track: **PS06**). It analyzes multi-month customer transaction histories against deterministic risk policies, establishes personalized behavioral baselines, and leverages Google Gemini as an auditable, grounded investigation copilot.
 
-The system is designed with a strict engineering boundary: **deterministic Python logic performs all numerical anomaly detection, baseline calculations, and rule evaluations, while Gemini performs reasoning, contextual explanation, uncertainty handling, and investigator-oriented reporting.**
+The system is built on a strict, defense-grade engineering boundary: **deterministic Python logic performs all numerical anomaly detection, mathematical baselines, and policy evaluations, while Gemini performs reasoning, plain-language synthesis, uncertainty calibration, and investigator action planning.**
 
-SentinelIQ flags activity for review and explains the evidence. It **never claims that fraud has occurred**, preserving the final judgement for human fraud analysts. When routine account activity presents no risk signals, it decisively reports: **NO ATTENTION REQUIRED**.
+SentinelIQ assists fraud analysts by surfacing actionable evidence. It **never claims that fraud has occurred**, ensuring that final determinations remain strictly human-in-the-loop. When routine account activity exhibits no risk signals, it decisively reports: **NO ATTENTION REQUIRED**.
 
 ---
 
-## Architecture Overview
+## The Banking Problem (PS06)
+
+Fraud desks face thousands of daily alerts, leading to investigator fatigue, high false-positive rates, and missed multi-stage attacks. Generic static rules (e.g., blanket amount thresholds) flag legitimate customer purchases while missing subtle behavioral shifts. Conversely, ungrounded GenAI solutions hallucinate transaction amounts, invent phantom account numbers, and prematurely declare fraud.
+
+**SentinelIQ solves this through:**
+1. **Personalized Behavioral Baselines**: Every transaction is evaluated against the customer's *own* historical spending distributions, active hours, and frequent payees rather than naive population averages.
+2. **Deterministic Risk Policies (R01–R05)**: Mathematical detection of large transfers, payment bursts, off-hours anomalies, compounding behavioral shifts, and linked attack chains.
+3. **Grounded GenAI Synthesis**: Gemini generates structured investigation briefs strictly from pre-computed deterministic evidence and policy rules, enforcing zero fabrication.
+4. **Human-in-the-Loop Workflow**: Clear recommendations, customer interview questions, and mitigating factors empower human analysts to make informed decisions.
+
+---
+
+## Investigation Pipeline Architecture
 
 ```
-                   Transaction History (CSV / JSON)
-                                |
-                                v
-               Customer Baseline Analysis Engine
-         (Mean, Median, Usual Hours, Channels, Payees)
-                                |
-                                v
-               Deterministic Risk Analysis Engine
-         (R01: Large Transfers | R02: New Payee Burst | 
-          R03: Odd-Hours      | R04: Pattern Deviation | 
-          R05: Linked Transaction Chains)
-                                |
-                                v
-                   Structured Evidence Findings
-         (Txn IDs, Actual vs Baseline stats, Delta %, Rule IDs)
-                                |
-                                v
-            Local Risk Policy & Rules Retrieval (RAG)
-                                |
-                                v
-                Gemini Grounded Reasoning Engine
-         (Structured JSON, Priority Assessment, Uncertainty)
-                                |
-                                v
-       FastAPI Backend  <=======>  Professional Fraud Desk UI
+                 Customer Transaction History (CSV / JSON)
+                                     |
+                                     v
+                   Customer Behavioural Baseline Engine
+            (Median, IQR Bounds, Active Hours, Channels, Payees)
+                                     |
+                                     v
+                   Deterministic Risk Detection Engine
+            ┌──────────────────────────────────────────────────┐
+            │  R01: Unusually Large Transfer                   │
+            │  R02: New Payee Payment Burst                    │
+            │  R03: Odd-Hours Activity Anomaly                 │
+            │  R04: Customer Behaviour Deviation               │
+            │  R05: Linked Multi-Transaction Chain             │
+            └──────────────────────────────────────────────────┘
+                                     |
+                                     v
+                    Deterministic Evidence & Findings
+            (Finding IDs, Metrics, Multipliers, Delta %, Txn IDs)
+                                     |
+                                     v
+                   Transparent Grounding Context Builder
+            (Customer Profile + Baseline Summary + Triggered Rules)
+                                     |
+                                     v
+                  Grounded Gemini Investigation Copilot
+            (Structured JSON, Assessment, Concerns, Mitigating Factors)
+                                     |
+                                     v
+            FastAPI Backend  <═══════════════>  Investigation UI
+                         (Port 8000 / Vanilla Web)
 ```
 
 ---
 
-## Core Features
+## Deterministic Logic vs. Gemini Copilot Responsibilities
 
-- **Decisive First Finding**: Immediately signals `YES — Attention Required` or `NO — No Attention Required`.
-- **Customer-Centric Baselines**: Calculates personalized behavioral baselines per customer rather than imposing naive global static rules.
-- **Deterministic Risk Engine**:
-  - **R01 (Unusually Large Transfer)**: Flags transactions exceeding personal historical median/average and high-value threshold deviations.
-  - **R02 (New Payee Payment Burst)**: Catches multiple rapid payments to a newly encountered payee.
-  - **R03 (Odd-Hours Activity)**: Evaluates high-risk time windows (e.g., 00:00–05:00) against the customer's established active hours.
-  - **R04 (Customer Behavior Deviation)**: Multi-factor evaluation combining unusual amount, payee, channel, and frequency.
-  - **R05 (Linked Transaction Pattern)**: Correlates related suspicious transactions into an investigation chain.
-- **Auditable Evidence Chains**: Every finding includes exact transaction IDs, amounts, dates, channels, baseline comparisons, and triggered rule IDs.
-- **Grounded AI Synthesis**: Uses Gemini with structured JSON output strictly grounded in deterministic evidence and local risk policy documents.
-- **Zero Fraud Accusation Guarantee**: Maintains neutral, investigative language, highlights uncertainties, and designates human investigator next steps.
-- **Fraud Desk Investigation UI**: Single-page dashboard with customer selector, interactive transaction explorer, visual baseline stats, evidence timeline, and investigator action recommendations.
-
----
-
-## Deterministic Logic vs. Gemini Responsibilities
-
-| Responsibility | Deterministic Engine (Python) | Gemini GenAI |
+| Responsibility | Deterministic Engine (Python) | Gemini Copilot (GenAI) |
 | :--- | :---: | :---: |
-| Statistical baselines (mean, median, hours, channels) | **Yes** | No |
-| Anomaly detection & threshold checks | **Yes** | No |
-| Rule trigger evaluations (R01–R05) | **Yes** | No |
-| Transaction linking & timeline grouping | **Yes** | No |
-| Evidence compilation & delta calculations | **Yes** | No |
-| Evidence synthesis & narrative explanation | No | **Yes** |
-| Policy grounding & rule context interpretation | No | **Yes** |
-| Prioritizing what to investigate first | Guided | **Yes** |
-| Identifying investigative uncertainties | No | **Yes** |
-| Formulating recommended investigator next steps | No | **Yes** |
+| Statistical baseline calculation (IQR, median, active hours) | **Authoritative Source** | Reads only |
+| Mathematical anomaly detection & threshold evaluations | **Authoritative Source** | Reads only |
+| Risk rule evaluations (R01–R05) & scoring (0–100) | **Authoritative Source** | Reads only |
+| Transaction linking & attack sequence grouping | **Authoritative Source** | Reads only |
+| Evidence compilation & finding ID generation | **Authoritative Source** | Reads only |
+| Plain-language investigation synthesis & narrative | Excluded | **Grounded Synthesis** |
+| Policy rule context & rationale interpretation | Excluded | **Grounded Synthesis** |
+| Identifying mitigating context (known payees, typical hours) | Feeds context | **Grounded Synthesis** |
+| Formulating customer interview questions & next steps | Excluded | **Grounded Synthesis** |
+| Overriding scores or inventing transaction data | **Strictly Forbidden** | **Strictly Forbidden** |
 
 ---
 
-## Risk Rules Summary
+## Deterministic Risk Policies (R01–R05)
 
-- **R01 — Unusually Large Transfer**: Flags transfers materially exceeding customer historical median and average.
-- **R02 — New Payee Payment Burst**: Flags rapid successive payments to an unfamiliar payee.
-- **R03 — Odd-Hours Activity**: Flags transactions during high-risk windows (00:00–05:00) deviating from personal active hours.
-- **R04 — Customer Behaviour Deviation**: Detects compound anomalies in channel, amount, frequency, and beneficiary.
-- **R05 — Linked Transaction Pattern**: Connects multi-transaction events (e.g., test transaction followed by large outflow).
-
----
-
-## Dataset Description
-
-SentinelIQ includes synthetic datasets modeled on realistic retail banking customer patterns:
-
-1. **Customer 1 (Routine Activity)**: Regular daytime expenses, utility bills, salary credits. *(Expected: NO ATTENTION REQUIRED)*
-2. **Customer 2 (Large Transfer Anomaly)**: Consistent low-value transactions followed by an unprecedented large transfer. *(Expected: R01)*
-3. **Customer 3 (New Payee Burst)**: Rapid successive transfers to an unseen beneficiary within a 2-hour window. *(Expected: R02)*
-4. **Customer 4 (Odd-Hours Activity)**: Customer with exclusively business-hours activity making late-night transactions at 03:30 AM. *(Expected: R03)*
-5. **Customer 5 (Complex Linked Pattern)**: Rapid-fire micro-burst to a new payee followed by an off-hours spike. *(Expected: R02, R03, R05)*
-6. **Customer 6 (Ambiguous / Borderline Case)**: Slightly elevated holiday spending, borderline deviation, requiring human investigator nuance without premature alarm.
+- **R01 — Unusually Large Transfer**: Flags transfers materially exceeding the customer's historical 1.5x IQR upper bound and personal median.
+- **R02 — New Payee Payment Burst**: Detects rapid consecutive outbound transfers to an unfamiliar beneficiary within a short time window.
+- **R03 — Odd-Hours Activity**: Identifies transactions occurring during nocturnal high-risk windows (00:00–05:00) deviating from the customer's historical active hours.
+- **R04 — Customer Behaviour Deviation**: Detects compounding multi-factor shifts combining unusual amount, atypical channel, velocity, and unfamiliar payee.
+- **R05 — Linked Transaction Pattern**: Correlates multi-stage attack signatures (e.g., nominal probing transfer followed by rapid drain transfers).
 
 ---
 
-## Quickstart & Running the Application
+## Synthetic Customer Scenarios
+
+SentinelIQ includes 6 realistic retail banking scenarios designed to stress-test every facet of the investigation workflow:
+
+1. **CUST001 — Priya Sharma (Routine Control)**: Consistent daytime expenses, grocery shopping, utility bills. *(Expected: Score 0, 0 findings, NO ATTENTION REQUIRED)*
+2. **CUST002 — Rajesh Verma (High-Value Transfer)**: Routine salary earner executing an unprecedented $24,500 NEFT transfer. *(Expected: R01, R04, Score 85)*
+3. **CUST003 — Vikram Malhotra (New Payee Velocity Burst)**: Three rapid transfers totaling $4,800 to an unseen beneficiary within 2 hours. *(Expected: R02, Score 75)*
+4. **CUST004 — Ananya Desai (Off-Hours Activity)**: Daytime-only account with sudden nocturnal IMPS transfers at 03:30 AM. *(Expected: R03, Score 70)*
+5. **CUST005 — Sameer Khan (Linked Probing & Velocity Chain)**: A $1.00 probing transfer at 03:10 AM followed by four high-value IMPS transfers totaling $19,200 within 52 minutes. *(Expected: R05, R02, R03, Score 95)*
+6. **CUST006 — Sunita Rao (Ambiguous Anomaly)**: A $3,200 retail purchase at Tanishq Jewellers breaching the numerical upper bound, but conducted during normal daytime hours at a known merchant. *(Expected: R01, Score 55 — Mitigating context identified)*
+
+---
+
+## Investigation Dashboard (Phase 6)
+
+The single-page web dashboard is served directly by FastAPI via vanilla HTML, CSS, and modern JavaScript:
+- **Zero Build Tools**: No Node.js, React, or npm required.
+- **Real Backend APIs**: All data is dynamically queried; zero hardcoded responses.
+- **Interactive Finding-to-Ledger Highlighting**: Clicking any finding card automatically scrolls to and pulses the linked transaction rows in the ledger.
+- **On-Demand Copilot Generation**: Gemini synthesis is triggered on-demand via the "Generate Investigation" button with clear loading states and graceful error handling.
+
+---
+
+## API Endpoints Reference
+
+All endpoints are fully implemented, schema-validated, and live:
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Investigation Dashboard web application |
+| `GET` | `/api/health` | Health, readiness, and API key presence check |
+| `GET` | `/api/customers` | List all 6 customer profiles and scenarios |
+| `GET` | `/api/customers/{customer_id}` | Get customer metadata by ID |
+| `GET` | `/api/customers/{customer_id}/transactions` | Customer transaction ledger |
+| `GET` | `/api/rules` | Auditable risk policy rules (R01–R05) |
+| `GET` | `/api/customers/{customer_id}/baseline` | Full multi-profile behavioral baseline |
+| `GET` | `/api/customers/{customer_id}/baseline/summary` | Condensed behavioral baseline metrics |
+| `GET` | `/api/customers/{customer_id}/risk-analysis` | Deterministic risk analysis, scores, and findings |
+| `GET` | `/api/customers/{customer_id}/findings` | All deterministic findings for customer |
+| `GET` | `/api/customers/{customer_id}/findings/{finding_id}` | Detailed finding view by finding ID |
+| `GET` | `/api/customers/{customer_id}/investigation/context` | Transparent grounding context sent to LLM |
+| `GET` | `/api/customers/{customer_id}/investigation` | Grounded Gemini Copilot investigation report |
+
+---
+
+## Setup & Quickstart
 
 ### Prerequisites
 - Python 3.11+
-- Google Gemini API Key
+- Google Gemini API Key (optional for deterministic engine; required for GenAI copilot synthesis)
 
-### Installation
+### 1. Installation
 
 ```bash
-# Clone and navigate to project root
-cd sentineliq
+# Clone the repository
+git clone https://github.com/Thanishka-saravanan/sentineliq-transaction-risk-assistant.git
+cd sentineliq-transaction-risk-assistant
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### Configuration
+### 2. Environment Configuration
 
-Set your Gemini API key in your terminal or create a `.env` file:
+Copy the provided template and configure your environment:
 
 ```bash
-# Windows PowerShell
-$env:GEMINI_API_KEY="your-gemini-api-key-here"
-
-# Linux / macOS
-export GEMINI_API_KEY="your-gemini-api-key-here"
+# Copy template
+cp .env.example .env
 ```
 
-> **Note:** If `GEMINI_API_KEY` is not provided, SentinelIQ will still execute full deterministic risk analysis and baseline calculations, surfacing a clear UI alert indicating that AI narrative synthesis is paused.
+Edit `.env` or set environment variables in your terminal:
 
-### Startup
+```env
+GEMINI_API_KEY=your-gemini-api-key-here
+GEMINI_MODEL=gemini-3.6-flash
+SSL_VERIFY=true
+PORT=8000
+```
 
-Start the application with a single command:
+> **Graceful Degradation Note:** If `GEMINI_API_KEY` is not provided, SentinelIQ remains 100% operational for baseline calculations, deterministic risk analysis, policy lookup, and transaction ledger exploration. The UI displays an informative alert when the investigation button is clicked.
+
+### 3. Running the Application
 
 ```bash
 python app.py
 ```
 
-The application will start automatically and be available at:
-
-**http://localhost:8000**
+The application will start at: **http://localhost:8000** (or your configured `PORT`).
 
 ---
 
-## API Endpoints
+## Automated Test Suite
 
-- `GET /api/health` — Application health check and status
-- `GET /` — SentinelIQ fraud desk investigation web interface
-- `GET /api/customers` — List available customer profiles and test scenarios
-- `GET /api/customers/{customer_id}` — Customer details and metadata
-- `GET /api/customers/{customer_id}/transactions` — Historical transactions for customer
-- `POST /api/investigate/{customer_id}` — Run deterministic analysis, retrieval, and grounded AI investigation
-- `GET /api/rules` — View local risk policy rules (R01–R05)
-
----
-
-## Test Scenarios & Automated Testing
-
-Run the test suite to verify all baseline calculations, rule engines, and scenarios:
+Run the complete automated test suite (69 offline unit & integration tests):
 
 ```bash
-pytest tests/
+python -m unittest discover -s tests
+```
+
+To run the live endpoint verification script against a running server:
+
+```bash
+python -u scripts/verify_endpoints.py
 ```
 
 ---
 
-## Known Limitations
+## End-to-End Demo Flow (For Hackathon Judges)
 
-- Real-time streaming webhook ingestion is simulated via preloaded transaction files.
-- Embedding indexes for local risk rules are generated locally using Gemini embeddings or local vector cosine similarity.
-- Multi-currency conversions assume a unified standard base currency (USD/EUR/GBP/INR) per customer.
+1. **Launch Dashboard**: Open `http://localhost:8000`.
+2. **Showcase Attack Chain (`CUST005 — Sameer Khan`)**:
+   - Selected by default on load.
+   - Observe the 4-step sequence callout: *Probe ($1.00) → Escalation ($4,500) → Rapid Burst ($9,700) → Drain ($5,000)*.
+   - Click the **R05 Linked Pattern** finding card to view mathematical evidence and policy basis.
+   - Click **"View & Highlight Linked Transactions"** to automatically scroll the ledger to rows `TXN0140`–`TXN0144`.
+   - Click **"Generate Investigation"** to observe Gemini synthesizing the chain into an executive summary with concrete investigator questions and actions.
+3. **Ambiguity Calibration (`CUST006 — Sunita Rao`)**:
+   - Select `CUST006` from the sidebar.
+   - Observe the amber alert: *"Policy threshold triggered — mitigating context identified"*.
+   - Generate the investigation to see Gemini highlight mitigating factors (*known merchant, daylight hour, primary card channel*) and express appropriate investigative uncertainty rather than declaring fraud.
+4. **Routine Account Baseline (`CUST001 — Priya Sharma`)**:
+   - Select `CUST001` from the sidebar.
+   - Observe the calm green state: *"No Deterministic Policy Findings — Routine Account Activity"*, Score: 0/100, Review: NOT REQUIRED.
+   - Generate the investigation to verify the copilot decisively reports: **NO ATTENTION REQUIRED**.
 
 ---
 
-## Demo Video Placeholder
+## Regulatory Compliance & Safety Statement
 
-> **Demo Walkthrough Video**: `[Link to Demo Video Placeholder]`
+> [!IMPORTANT]
+> **Regulatory Notice**: The system identifies activity requiring human review. A risk finding does not establish that fraud has occurred. All final account actions, freezes, and SAR filings remain strictly with licensed human fraud analysts.

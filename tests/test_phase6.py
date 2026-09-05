@@ -115,6 +115,31 @@ class TestPhase6Dashboard(unittest.TestCase):
         r = self.client.get("/api/customers/INVALID999/baseline/summary")
         self.assertEqual(r.status_code, 404)
 
+    def test_phase7e_workstation_features(self):
+        """Verify Phase 7E Enterprise Workstation features in HTML, CSS, and JS."""
+        html = self.client.get("/").text
+        self.assertIn('id="system-status-bar"', html)
+        self.assertIn('id="timeline-container"', html)
+        self.assertIn('id="unusual-comparison-container"', html)
+        self.assertIn('id="tx-filter-all"', html)
+        self.assertIn('id="tx-channel-filter"', html)
+        self.assertIn("Deterministic Risk Score", html)
+        self.assertIn("BANKING OPERATIONS", html)
+
+        css = self.client.get("/static/css/styles.css").text
+        self.assertIn(".timeline-track", css)
+        self.assertIn(".unusual-grid", css)
+        self.assertIn(".tx-filter-bar", css)
+        self.assertIn(".priority-card", css)
+        self.assertIn(".grounded-ai-badge", css)
+
+        js = self.client.get("/static/js/app.js").text
+        self.assertIn("renderTimeline", js)
+        self.assertIn("renderUnusualComparison", js)
+        self.assertIn("What Happened?", js)
+        self.assertIn("Why It Matters", js)
+        self.assertIn("What To Investigate First", js)
+
 
 if __name__ == "__main__":
     unittest.main()

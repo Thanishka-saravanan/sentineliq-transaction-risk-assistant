@@ -8,6 +8,7 @@ from app import app
 from src.genai_service import (
     GeminiNotConfiguredError,
     GeminiServiceError,
+    _parse_ssl_verify,
     generate_investigation_report,
     validate_and_sanitize_investigation_result,
 )
@@ -214,6 +215,27 @@ class TestPhase5(unittest.TestCase):
         self.assertIn("deterministic_findings", data)
         self.assertIn("relevant_policy_rules", data)
         self.assertIn("relevant_transactions", data)
+
+    def test_ssl_verify_configuration(self):
+        """Verify SSL_VERIFY parsing: defaults to True and supports common boolean representations."""
+        # 1. Default when unset (None) -> True
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertTrue(_parse_ssl_verify())
+
+        # 2. Truthy representations -> True
+        for val in ["true", "True", "TRUE", "1", "yes", "YES", "on", "ON"]:
+            with patch.dict(os.environ, {"SSL_VERIFY": val}):
+                self.assertTrue(_parse_ssl_verify())
+
+        # 3. Falsy representations -> False
+        for val in ["false", "False", "FALSE", "0", "no", "NO", "off", "OFF"]:
+            with patch.dict(os.environ, {"SSL_VERIFY": val}):
+                self.assertFalse(_parse_ssl_verify())
+
+        # 4. Invalid strings -> fallback to secure default True
+        for val in ["invalid", "maybe", "not_a_bool"]:
+            with patch.dict(os.environ, {"SSL_VERIFY": val}):
+                self.assertTrue(_parse_ssl_verify())
 
 
 if __name__ == "__main__":

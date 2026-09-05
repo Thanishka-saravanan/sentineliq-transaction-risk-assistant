@@ -18,13 +18,22 @@
                     <h1>
                         SentinelIQ
                         <span class="track-badge">TRACK_ID: PS06</span>
+                        <span class="sector-badge">BANKING OPERATIONS</span>
                     </h1>
                     <div class="brand-subtitle">Grounded AI for transaction risk investigation</div>
                 </div>
             </div>
 
             <div class="header-center" aria-label="Investigation Architecture Pipeline">
+                <span class="pipeline-step">Transaction History</span>
+                <span class="pipeline-arrow">&rarr;</span>
+                <span class="pipeline-step">Behavioral Baseline</span>
+                <span class="pipeline-arrow">&rarr;</span>
                 <span class="pipeline-step">Deterministic Detection</span>
+                <span class="pipeline-arrow">&rarr;</span>
+                <span class="pipeline-step">Traceable Evidence</span>
+                <span class="pipeline-arrow">&rarr;</span>
+                <span class="pipeline-step">Investigation Timeline</span>
                 <span class="pipeline-arrow">&rarr;</span>
                 <span class="pipeline-step">Grounded AI</span>
                 <span class="pipeline-arrow">&rarr;</span>
@@ -32,6 +41,24 @@
             </div>
 
             <div class="header-right">
+                <div class="system-status-bar" id="system-status-bar" aria-label="System Health Status">
+                    <div class="status-pill" id="status-api" title="REST API Status">
+                        <span class="status-dot dot-green"></span>
+                        <span class="status-label">API: <strong id="status-api-text">Operational</strong></span>
+                    </div>
+                    <div class="status-pill" id="status-engine" title="Deterministic Risk Engine">
+                        <span class="status-dot dot-green"></span>
+                        <span class="status-label">Risk Engine: <strong>Operational</strong></span>
+                    </div>
+                    <div class="status-pill" id="status-gemini" title="Gemini 3.6 Flash Integration">
+                        <span class="status-dot dot-green" id="gemini-status-dot"></span>
+                        <span class="status-label">Gemini: <strong id="status-gemini-text">Connected</strong></span>
+                    </div>
+                    <div class="status-pill" id="status-data" title="Synthetic Customer Data">
+                        <span class="status-dot dot-green"></span>
+                        <span class="status-label">Data: <strong>Loaded</strong></span>
+                    </div>
+                </div>
                 <div id="header-investigation-badge" class="investigation-badge badge-routine">
                     <div class="pulse-dot"></div>
                     <span>Initializing...</span>
@@ -58,134 +85,249 @@
 
         <!-- Main Content Area -->
         <section class="main-content" aria-label="Investigation Workspace">
-            <!-- Top Customer Overview Banner -->
-            <div class="overview-banner">
-                <div class="overview-main">
-                    <h2>
-                        <span id="overview-customer-name">Select Customer</span>
-                        <span id="overview-customer-id" class="customer-id-pill">ID</span>
-                    </h2>
-                    <div id="overview-customer-scenario" class="overview-scenario">Scenario description</div>
-                </div>
-                <div class="overview-metric">
-                    <div class="metric-label">Transactions</div>
-                    <div id="metric-tx-count" class="metric-val">0</div>
-                </div>
-                <div class="overview-metric">
-                    <div class="metric-label">Risk Severity & Score</div>
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                        <div id="metric-severity"></div>
-                        <div id="metric-score" class="metric-val">0</div>
+            <!-- Executive Risk Summary Card -->
+            <div class="executive-summary-card">
+                <div class="summary-top">
+                    <div class="summary-customer-meta">
+                        <div class="customer-title-row">
+                            <h2 id="overview-customer-name">Select Customer</h2>
+                            <span id="overview-customer-id" class="customer-id-pill">ID</span>
+                            <span id="overview-badge-tag" class="severity-pill severity-routine">ROUTINE</span>
+                        </div>
+                        <div id="overview-customer-scenario" class="overview-scenario">Scenario description</div>
+                    </div>
+                    <div class="summary-review-action">
+                        <div class="review-title">Human Review Assessment</div>
+                        <div id="metric-review" class="review-status-val">PENDING</div>
+                        <div class="review-subtext" id="metric-review-subtext">Deterministic policy decision</div>
                     </div>
                 </div>
-                <div class="overview-metric">
-                    <div class="metric-label">Human Review Status</div>
-                    <div id="metric-review" class="metric-val" style="font-size:1.05rem;">PENDING</div>
-                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Triggered Rules: <span id="metric-rules-count" style="font-weight:600; color:var(--text-primary);">0</span></div>
+
+                <div class="summary-metrics-grid">
+                    <!-- Deterministic Risk Score Widget -->
+                    <div class="score-metric-box">
+                        <div class="metric-header-row">
+                            <span class="metric-label">Deterministic Risk Score</span>
+                            <span class="score-scale">0–100 Scale</span>
+                        </div>
+                        <div class="score-display">
+                            <span id="metric-score" class="score-number">0</span>
+                            <span class="score-denom">/ 100</span>
+                        </div>
+                        <div class="score-progress-bar">
+                            <div id="metric-score-bar" class="score-progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="score-disclaimer">
+                            Deterministic risk score indicates activity requiring review; it is not a statistical probability of fraud.
+                        </div>
+                    </div>
+
+                    <!-- Severity Metric -->
+                    <div class="summary-metric-box">
+                        <div class="metric-label">Highest Severity</div>
+                        <div id="metric-severity" class="metric-metric-val">--</div>
+                        <div class="metric-subtext">Peak threshold breach</div>
+                    </div>
+
+                    <!-- Triggered Rules Metric -->
+                    <div class="summary-metric-box">
+                        <div class="metric-label">Triggered Risk Rules</div>
+                        <div id="metric-rules-count" class="metric-metric-val">0</div>
+                        <div class="metric-subtext" id="metric-rules-list">Out of R01–R05 policies</div>
+                    </div>
+
+                    <!-- Findings Metric -->
+                    <div class="summary-metric-box">
+                        <div class="metric-label">Deterministic Findings</div>
+                        <div id="metric-findings-count" class="metric-metric-val">0</div>
+                        <div class="metric-subtext">Auditable rule violations</div>
+                    </div>
+
+                    <!-- Transactions Reviewed -->
+                    <div class="summary-metric-box">
+                        <div class="metric-label">Transactions Audited</div>
+                        <div id="metric-tx-count" class="metric-metric-val">0</div>
+                        <div class="metric-subtext">Evaluated against baseline</div>
+                    </div>
                 </div>
             </div>
 
             <!-- Dynamic Special Case Callout Container (CUST001, CUST005, CUST006) -->
             <div id="special-callout-container"></div>
 
-            <!-- Middle Grid: Behavioural Baseline & Deterministic Findings -->
-            <div class="middle-grid">
-                <!-- Behavioural Baseline Panel -->
-                <div class="content-card">
-                    <div class="content-card-header">
-                        <div>
-                            <div class="card-title">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
-                                Customer Behavioural Baseline
+            <!-- Two-Column Investigation Core -->
+            <div class="investigation-grid">
+                <!-- LEFT COLUMN: Deterministic Evidence & Timeline -->
+                <div class="evidence-column">
+                    <!-- Feature 1: Dynamic Investigation Timeline -->
+                    <div class="content-card timeline-card">
+                        <div class="content-card-header">
+                            <div>
+                                <div class="card-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    Investigation Timeline
+                                </div>
+                                <div class="card-subtitle">Chronological sequence of flagged activity with inter-transaction elapsed intervals</div>
                             </div>
-                            <div class="card-subtitle">Personalized multi-month spending distribution</div>
+                            <span id="timeline-count-badge" class="customer-id-pill">0 events</span>
+                        </div>
+                        <div id="timeline-container" class="timeline-container">
+                            <!-- Populated dynamically via app.js -->
                         </div>
                     </div>
-                    <div id="baseline-container">
-                        <!-- Populated via app.js -->
-                        <div style="color:var(--text-muted); font-size:0.8rem;">Loading baseline metrics...</div>
+
+                    <!-- Feature 2: Why This Is Unusual For This Customer -->
+                    <div class="content-card unusual-card">
+                        <div class="content-card-header">
+                            <div>
+                                <div class="card-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+                                    Why This Is Unusual For This Customer
+                                </div>
+                                <div class="card-subtitle">Direct quantitative comparison between established baseline and observed activity</div>
+                            </div>
+                            <span class="tag-pill">Personalized Baseline</span>
+                        </div>
+                        <div id="unusual-comparison-container" class="unusual-container">
+                            <!-- Populated dynamically via app.js -->
+                        </div>
+                    </div>
+
+                    <!-- Customer Behavioural Baseline Profile -->
+                    <div class="content-card">
+                        <div class="content-card-header">
+                            <div>
+                                <div class="card-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                                    Customer Behavioral Baseline Profile
+                                </div>
+                                <div class="card-subtitle">Empirical multi-month distribution (IQR bounds, active hours, channels, payees)</div>
+                            </div>
+                        </div>
+                        <div id="baseline-container">
+                            <!-- Populated dynamically via app.js -->
+                            <div style="color:var(--text-muted); font-size:0.8rem;">Loading baseline metrics...</div>
+                        </div>
+                    </div>
+
+                    <!-- Deterministic Policy Findings & Policy Basis -->
+                    <div class="content-card">
+                        <div class="content-card-header">
+                            <div>
+                                <div class="card-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    Deterministic Policy Findings
+                                </div>
+                                <div class="card-subtitle">Auditable risk rule evaluations (R01–R05) with traceable evidence linkage</div>
+                            </div>
+                            <span id="findings-count-badge" class="severity-pill severity-low">0</span>
+                        </div>
+                        <div id="findings-container" class="findings-container">
+                            <!-- Populated dynamically via app.js -->
+                        </div>
+                    </div>
+
+                    <!-- Transaction Evidence Ledger with Filter Controls -->
+                    <div class="content-card">
+                        <div class="content-card-header">
+                            <div>
+                                <div class="card-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                    Transaction Evidence Ledger
+                                </div>
+                                <div class="card-subtitle">Complete ledger of customer transactions with risk relevance indicators</div>
+                            </div>
+                            <span id="tx-count-badge" class="customer-id-pill">0 txns</span>
+                        </div>
+
+                        <!-- Filter Controls Bar -->
+                        <div class="tx-filter-bar" aria-label="Transaction Ledger Filters">
+                            <div class="filter-group">
+                                <span class="filter-label">Filter:</span>
+                                <button type="button" class="filter-btn active" id="tx-filter-all" data-filter="all">All</button>
+                                <button type="button" class="filter-btn" id="tx-filter-risk" data-filter="risk">Risk-Relevant</button>
+                                <button type="button" class="filter-btn" id="tx-filter-normal" data-filter="normal">Normal</button>
+                            </div>
+                            <div class="filter-group">
+                                <label for="tx-channel-filter" class="filter-label">Channel:</label>
+                                <select id="tx-channel-filter" class="channel-select" aria-label="Filter by Transaction Channel">
+                                    <option value="all">All Channels</option>
+                                    <option value="CARD">CARD</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="NET_BANKING">NET_BANKING</option>
+                                    <option value="IMPS">IMPS</option>
+                                </select>
+                            </div>
+                            <div class="filter-legend">
+                                <span class="legend-item"><span class="badge-dot dot-critical"></span> High Relevance</span>
+                                <span class="legend-item"><span class="badge-dot dot-supporting"></span> Supporting</span>
+                                <span class="legend-item"><span class="badge-dot dot-normal"></span> Normal</span>
+                            </div>
+                        </div>
+
+                        <div class="tx-table-container">
+                            <table class="tx-table" aria-label="Customer Transaction History">
+                                <thead>
+                                    <tr>
+                                        <th>Date &amp; Time</th>
+                                        <th>Transaction ID</th>
+                                        <th>Amount</th>
+                                        <th>Channel</th>
+                                        <th>Payee</th>
+                                        <th>Status</th>
+                                        <th>Risk Relevance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tx-table-body">
+                                    <!-- Populated dynamically via app.js -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Deterministic Findings Panel -->
-                <div class="content-card">
-                    <div class="content-card-header">
-                        <div>
-                            <div class="card-title">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Deterministic Policy Findings
+                <!-- RIGHT COLUMN: Grounded Gemini Investigator Copilot -->
+                <div class="copilot-column">
+                    <section class="copilot-section" aria-label="Gemini Investigation Copilot">
+                        <div class="copilot-header">
+                            <div class="copilot-title-group">
+                                <div class="copilot-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                </div>
+                                <div>
+                                    <div class="copilot-title">
+                                        Investigator Copilot
+                                        <span class="grounded-ai-badge">GROUNDED AI SYNTHESIS</span>
+                                    </div>
+                                    <div class="copilot-subtitle">Reasoning strictly anchored to deterministic findings &amp; customer baseline</div>
+                                </div>
                             </div>
-                            <div class="card-subtitle">Auditable policy rule evaluations (R01–R05)</div>
+                            <button id="btn-generate-ai" class="btn-generate-ai" type="button">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
+                                <span>Generate Investigation</span>
+                            </button>
                         </div>
-                        <span id="findings-count-badge" class="severity-pill severity-low">0</span>
-                    </div>
-                    <div id="findings-container" class="findings-container">
-                        <!-- Populated via app.js -->
-                    </div>
+
+                        <!-- Grounding Context Banner -->
+                        <div class="grounding-info-bar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <span>Model: <strong>gemini-3.6-flash</strong> &bull; Grounded strictly on deterministic findings, empirical baseline bounds, and verified ledger records.</span>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="copilot-loading" class="copilot-loading">
+                            <div class="spinner"></div>
+                            <span class="loading-text" id="copilot-loading-text">Analyzing evidence and grounding investigation...</span>
+                        </div>
+
+                        <!-- Notice / Error Box -->
+                        <div id="copilot-notice" class="copilot-notice"></div>
+
+                        <!-- Copilot Structured 7-Section Output Container -->
+                        <div id="copilot-output" class="copilot-output"></div>
+                    </section>
                 </div>
             </div>
-
-            <!-- Transaction Evidence Table -->
-            <div class="content-card">
-                <div class="content-card-header">
-                    <div>
-                        <div class="card-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-                            Transaction Evidence Ledger
-                        </div>
-                        <div class="card-subtitle">Referenced and contextual transactions with highlighted policy flags</div>
-                    </div>
-                    <span id="tx-count-badge" class="customer-id-pill">0 txns</span>
-                </div>
-                <div class="tx-table-container">
-                    <table class="tx-table" aria-label="Customer Transaction History">
-                        <thead>
-                            <tr>
-                                <th>Date & Time</th>
-                                <th>Transaction ID</th>
-                                <th>Amount</th>
-                                <th>Channel</th>
-                                <th>Payee</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tx-table-body">
-                            <!-- Populated via app.js -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Grounded Gemini Investigation Copilot Panel -->
-            <section class="copilot-section" aria-label="Gemini Investigation Copilot">
-                <div class="copilot-header">
-                    <div class="copilot-title-group">
-                        <div class="copilot-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                        </div>
-                        <div>
-                            <div class="copilot-title">Gemini Investigation Copilot</div>
-                            <div class="copilot-subtitle">Grounded reasoning & synthesis based strictly on deterministic findings</div>
-                        </div>
-                    </div>
-                    <button id="btn-generate-ai" class="btn-generate-ai">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
-                        Generate Investigation
-                    </button>
-                </div>
-
-                <!-- Loading State -->
-                <div id="copilot-loading" class="copilot-loading">
-                    <div class="spinner"></div>
-                    <span class="loading-text">Grounding evidence and generating investigation...</span>
-                </div>
-
-                <!-- Notice / Error Box -->
-                <div id="copilot-notice" class="copilot-notice"></div>
-
-                <!-- Copilot Structured Output Container -->
-                <div id="copilot-output" class="copilot-output"></div>
-            </section>
         </section>
     </main>
 

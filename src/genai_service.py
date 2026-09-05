@@ -49,10 +49,32 @@ Produce your response as valid JSON matching the required schema.
 """
 
 
+def _parse_ssl_verify() -> bool:
+    """
+    Parses the SSL_VERIFY environment variable with a secure default (True).
+
+    Accepts common boolean representations:
+      - False values: 'false', '0', 'no', 'off'
+      - True values: 'true', '1', 'yes', 'on'
+
+    NOTE: Disabling TLS verification (SSL_VERIFY=false) is intended ONLY for controlled
+    local development, corporate-proxy interception, or non-production testing.
+    In normal production and banking usage, TLS verification MUST remain enabled.
+    """
+    raw_val = os.getenv("SSL_VERIFY")
+    if raw_val is None:
+        return True
+
+    val = raw_val.strip().lower()
+    if val in ("false", "0", "no", "off"):
+        return False
+    return True
+
+
 def get_gemini_client(client_override: Optional[Any] = None) -> Any:
     """
     Constructs and returns the official Google GenAI client.
-    
+
     Raises GeminiNotConfiguredError if GEMINI_API_KEY is not set.
     """
     if client_override is not None:
@@ -69,10 +91,17 @@ def get_gemini_client(client_override: Optional[Any] = None) -> Any:
         from google import genai
         from google.genai import types
 
-        # On Windows, configure client_args to prevent local root CA validation failures and set resilient connect/read timeouts
+        # Configure TLS certificate verification (default is secure True)
+        ssl_verify = _parse_ssl_verify()
+        if not ssl_verify:
+            logger.warning(
+                "TLS certificate verification is DISABLED via SSL_VERIFY=false. "
+                "This setting is only for controlled local testing and must not be used in production."
+            )
+
         http_options = types.HttpOptions(
             client_args={
-                "verify": False,
+                "verify": ssl_verify,
                 "timeout": httpx.Timeout(connect=30.0, read=60.0, write=30.0, pool=30.0),
             }
         )
@@ -98,7 +127,7 @@ def validate_and_sanitize_investigation_result(
 ) -> InvestigationResult:
     """
     Validates Gemini output against the deterministic source of truth.
-    
+
     1. Ensures valid finding IDs and rule IDs exist in deterministic findings.
     2. Drops or sanitizes any hallucinated finding IDs or rule IDs.
     3. Preserves the mandatory regulatory disclaimer.
@@ -192,7 +221,7 @@ def generate_investigation_report(
 ) -> InvestigationResult:
     """
     Executes grounded Gemini synthesis for a customer.
-    
+
     1. Builds verified grounding context.
     2. Calls Gemini using google-genai SDK.
     3. Validates and sanitizes structured output against deterministic source findings.
