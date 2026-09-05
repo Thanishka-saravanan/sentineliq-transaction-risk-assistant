@@ -4,133 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SentinelIQ — Transaction Risk Investigation Assistant</title>
-    <style>
-        :root {
-            --bg: #0b0f19;
-            --card-bg: #131b2e;
-            --border: #24304f;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.2);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #10b981;
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .container {
-            max-width: 720px;
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 2.5rem;
-            box-shadow: 0 10px 30px var(--accent-glow);
-        }
-        .badge {
-            display: inline-block;
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--accent);
-            padding: 0.35rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-        h1 {
-            font-size: 1.85rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: #ffffff;
-        }
-        p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        .status-box {
-            display: flex;
-            align-items: center;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 8px;
-            padding: 0.85rem 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--success);
-            box-shadow: 0 0 10px var(--success);
-            margin-right: 0.75rem;
-        }
-        .status-text {
-            color: #d1fae5;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .endpoints {
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .endpoints h3 {
-            font-size: 0.95rem;
-            color: var(--text-main);
-            margin-bottom: 0.5rem;
-        }
-        .endpoints ul {
-            list-style: none;
-        }
-        .endpoints li {
-            padding: 0.35rem 0;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #60a5fa;
-        }
-        .endpoints a {
-            color: inherit;
-            text-decoration: none;
-        }
-        .endpoints a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <div class="container">
-        <span class="badge">TRACK_ID: PS06 | BANKING</span>
-        <h1>SentinelIQ</h1>
-        <p>Transaction Risk Investigation Assistant for Bank Fraud Desk.</p>
-        
-        <div class="status-box">
-            <div class="status-dot"></div>
-            <div class="status-text">FastAPI Server Active &bull; Phase 1 Skeleton Initialized</div>
-        </div>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="brand-section">
+                <div class="logo-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                </div>
+                <div class="brand-text">
+                    <h1>
+                        SentinelIQ
+                        <span class="track-badge">TRACK_ID: PS06</span>
+                    </h1>
+                    <div class="brand-subtitle">Grounded AI for transaction risk investigation</div>
+                </div>
+            </div>
 
-        <div class="endpoints">
-            <h3>Available Endpoints:</h3>
-            <ul>
-                <li>&bull; <a href="/api/health" target="_blank">GET /api/health</a> &mdash; Health status check</li>
-            </ul>
+            <div class="header-center" aria-label="Investigation Architecture Pipeline">
+                <span class="pipeline-step">Deterministic Detection</span>
+                <span class="pipeline-arrow">&rarr;</span>
+                <span class="pipeline-step">Grounded AI</span>
+                <span class="pipeline-arrow">&rarr;</span>
+                <span class="pipeline-step">Human Review</span>
+            </div>
+
+            <div class="header-right">
+                <div id="header-investigation-badge" class="investigation-badge badge-routine">
+                    <div class="pulse-dot"></div>
+                    <span>Initializing...</span>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-container">
+        <!-- Sidebar: Customer Selector -->
+        <aside class="sidebar" aria-label="Customer Selection">
+            <div class="sidebar-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Customer Accounts</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted);">6 Scenarios</span>
+                </div>
+                <div id="customer-list" class="customer-list" role="feed" aria-busy="false">
+                    <!-- Dynamic customer cards populated via app.js -->
+                    <div style="color:var(--text-muted); font-size:0.8rem; padding:0.5rem;">Loading accounts...</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <section class="main-content" aria-label="Investigation Workspace">
+            <!-- Top Customer Overview Banner -->
+            <div class="overview-banner">
+                <div class="overview-main">
+                    <h2>
+                        <span id="overview-customer-name">Select Customer</span>
+                        <span id="overview-customer-id" class="customer-id-pill">ID</span>
+                    </h2>
+                    <div id="overview-customer-scenario" class="overview-scenario">Scenario description</div>
+                </div>
+                <div class="overview-metric">
+                    <div class="metric-label">Transactions</div>
+                    <div id="metric-tx-count" class="metric-val">0</div>
+                </div>
+                <div class="overview-metric">
+                    <div class="metric-label">Risk Severity & Score</div>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <div id="metric-severity"></div>
+                        <div id="metric-score" class="metric-val">0</div>
+                    </div>
+                </div>
+                <div class="overview-metric">
+                    <div class="metric-label">Human Review Status</div>
+                    <div id="metric-review" class="metric-val" style="font-size:1.05rem;">PENDING</div>
+                    <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">Triggered Rules: <span id="metric-rules-count" style="font-weight:600; color:var(--text-primary);">0</span></div>
+                </div>
+            </div>
+
+            <!-- Dynamic Special Case Callout Container (CUST001, CUST005, CUST006) -->
+            <div id="special-callout-container"></div>
+
+            <!-- Middle Grid: Behavioural Baseline & Deterministic Findings -->
+            <div class="middle-grid">
+                <!-- Behavioural Baseline Panel -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <div>
+                            <div class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                                Customer Behavioural Baseline
+                            </div>
+                            <div class="card-subtitle">Personalized multi-month spending distribution</div>
+                        </div>
+                    </div>
+                    <div id="baseline-container">
+                        <!-- Populated via app.js -->
+                        <div style="color:var(--text-muted); font-size:0.8rem;">Loading baseline metrics...</div>
+                    </div>
+                </div>
+
+                <!-- Deterministic Findings Panel -->
+                <div class="content-card">
+                    <div class="content-card-header">
+                        <div>
+                            <div class="card-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                Deterministic Policy Findings
+                            </div>
+                            <div class="card-subtitle">Auditable policy rule evaluations (R01–R05)</div>
+                        </div>
+                        <span id="findings-count-badge" class="severity-pill severity-low">0</span>
+                    </div>
+                    <div id="findings-container" class="findings-container">
+                        <!-- Populated via app.js -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction Evidence Table -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div>
+                        <div class="card-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                            Transaction Evidence Ledger
+                        </div>
+                        <div class="card-subtitle">Referenced and contextual transactions with highlighted policy flags</div>
+                    </div>
+                    <span id="tx-count-badge" class="customer-id-pill">0 txns</span>
+                </div>
+                <div class="tx-table-container">
+                    <table class="tx-table" aria-label="Customer Transaction History">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Channel</th>
+                                <th>Payee</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tx-table-body">
+                            <!-- Populated via app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grounded Gemini Investigation Copilot Panel -->
+            <section class="copilot-section" aria-label="Gemini Investigation Copilot">
+                <div class="copilot-header">
+                    <div class="copilot-title-group">
+                        <div class="copilot-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        </div>
+                        <div>
+                            <div class="copilot-title">Gemini Investigation Copilot</div>
+                            <div class="copilot-subtitle">Grounded reasoning & synthesis based strictly on deterministic findings</div>
+                        </div>
+                    </div>
+                    <button id="btn-generate-ai" class="btn-generate-ai">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg>
+                        Generate Investigation
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="copilot-loading" class="copilot-loading">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Grounding evidence and generating investigation...</span>
+                </div>
+
+                <!-- Notice / Error Box -->
+                <div id="copilot-notice" class="copilot-notice"></div>
+
+                <!-- Copilot Structured Output Container -->
+                <div id="copilot-output" class="copilot-output"></div>
+            </section>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
 </body>
 </html>

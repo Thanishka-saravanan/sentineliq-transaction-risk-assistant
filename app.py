@@ -236,6 +236,12 @@ async def get_customer_investigation(customer_id: str):
             detail="Gemini investigation service is not configured. Set GEMINI_API_KEY to enable GenAI investigation synthesis."
         )
     except GeminiServiceError as e:
+        err_str = str(e).lower()
+        if "overloaded" in err_str or "unavailable" in err_str or "503" in err_str:
+            raise HTTPException(
+                status_code=503,
+                detail="Gemini investigation service is currently unavailable or overloaded. Please retry."
+            )
         raise HTTPException(
             status_code=502,
             detail=f"Gemini investigation service error: {str(e)}"

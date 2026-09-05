@@ -1,13 +1,16 @@
 import json
+import time
 import urllib.error
 import urllib.request
 
 base = "http://localhost:8000"
 
 endpoints = [
-    # Phase 1
+    # Phase 1 & 6 Frontend
     ("/api/health", 200),
     ("/", 200),
+    ("/static/css/styles.css", 200),
+    ("/static/js/app.js", 200),
     # Phase 2
     ("/api/customers", 200),
     ("/api/customers/CUST001", 200),
@@ -41,6 +44,8 @@ endpoints = [
 all_passed = True
 
 for path, expected_code in endpoints:
+    if "/investigation" in path:
+        time.sleep(2.5)
     url = base + path
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "SentinelIQ-Verifier/1.0"})
@@ -70,6 +75,6 @@ for path, expected_code in endpoints:
         all_passed = False
 
 if all_passed:
-    print("\nALL LIVE ENDPOINTS (PHASES 1-5) VERIFIED SUCCESSFULLY!")
+    print("\nALL LIVE ENDPOINTS (PHASES 1-6) VERIFIED SUCCESSFULLY!")
 else:
     raise SystemExit("Endpoint verification failed!")

@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import time
 from typing import Any, Dict, List, Optional
 from dotenv import load_dotenv
 
@@ -258,12 +259,25 @@ def generate_investigation_report(
                 temperature=0.1,  # Low temperature for strict determinism
             )
 
-            response = client.models.generate_content(
-                model=model_name,
-                contents=prompt_str,
-                config=config,
-            )
-            raw_text = response.text
+            max_retries = 2
+            last_err = None
+            for attempt in range(max_retries + 1):
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=prompt_str,
+                        config=config,
+                    )
+                    raw_text = response.text
+                    break
+                except Exception as e:
+                    last_err = e
+                    err_str = str(e).lower()
+                    if attempt < max_retries and ("overloaded" in err_str or "unavailable" in err_str or "429" in err_str or "503" in err_str):
+                        logger.warning(f"Gemini API transient failure (attempt {attempt+1}/{max_retries+1}): {e}. Retrying in {attempt + 2}s...")
+                        time.sleep(attempt + 2)
+                        continue
+                    raise last_err
         except Exception as e:
             logger.error(f"Gemini API generation failed for {customer_id}: {e}")
             raise GeminiServiceError(f"Gemini API request failed: {str(e)}")
